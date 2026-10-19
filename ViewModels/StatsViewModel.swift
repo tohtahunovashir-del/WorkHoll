@@ -89,11 +89,17 @@ final class StatsViewModel: ObservableObject {
                 )
             }
         }
-        topDishes = dishStats
-            .map { TopDishMetric(name: $0.key, count: $0.value.count, revenue: $0.value.revenue) }
-            .sorted { $0.count == $1.count ? $0.revenue > $1.revenue : $0.count > $1.count }
-            .prefix(6)
-            .map { $0 }
+        var mappedDishes: [TopDishMetric] = []
+        for (dishName, stat) in dishStats {
+            mappedDishes.append(TopDishMetric(name: dishName, count: stat.count, revenue: stat.revenue))
+        }
+        mappedDishes.sort { lhs, rhs in
+            if lhs.count == rhs.count {
+                return lhs.revenue > rhs.revenue
+            }
+            return lhs.count > rhs.count
+        }
+        topDishes = Array(mappedDishes.prefix(6))
 
         // Разбивка по способам оплаты
         var paymentStats: [PaymentMethod: (count: Int, amount: Double)] = [:]

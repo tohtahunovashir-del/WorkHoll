@@ -7,7 +7,8 @@ struct TableMapView: View {
 
     @State private var showTableSheet = false
     @State private var showAddTableSheet = false
-    @State private var activeOrderToOpen: OrderWithItems? = nil
+    @State private var showActiveOrderDetail = false
+    @State private var activeOrderIdToOpen: String? = nil
 
     private let gridColumns = [
         GridItem(.flexible(), spacing: 14),
@@ -33,7 +34,8 @@ struct TableMapView: View {
                                 showTableSheet = true
                             } onOpenOrder: { orderDetail in
                                 HapticManager.impact(.medium)
-                                activeOrderToOpen = orderDetail
+                                activeOrderIdToOpen = orderDetail.order.id
+                                showActiveOrderDetail = true
                             }
                         }
                     }
@@ -72,8 +74,10 @@ struct TableMapView: View {
             .sheet(isPresented: $showAddTableSheet) {
                 AddTableSheet()
             }
-            .navigationDestination(item: $activeOrderToOpen) { detail in
-                OrderDetailView(orderId: detail.order.id)
+            .navigationDestination(isPresented: $showActiveOrderDetail) {
+                if let orderId = activeOrderIdToOpen {
+                    OrderDetailView(orderId: orderId)
+                }
             }
         }
     }
