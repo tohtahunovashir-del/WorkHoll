@@ -7,26 +7,27 @@ final class DatabaseManager {
     let dbQueue: DatabaseQueue
 
     private init() {
-        do {
-            let fileManager = FileManager.default
-            let appSupportURL = try fileManager.url(
-                for: .applicationSupportDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: true
-            )
-            let dbURL = appSupportURL.appendingPathComponent("workholl.sqlite")
-            var config = Configuration()
-            config.foreignKeysEnabled = true
-            dbQueue = try DatabaseQueue(path: dbURL.path, configuration: config)
-            try migrator.migrate(dbQueue)
-            try seedInitialDataIfNeeded()
-        } catch {
-            // Fallback на in-memory базу в случае проблем с файловой системой (например, в превью)
-            dbQueue = try! DatabaseQueue()
-            try? migrator.migrate(dbQueue)
-            try? seedInitialDataIfNeeded()
+        var config = Configuration()
+        config.foreignKeysEnabled = true
+
+        let resolvedQueue: DatabaseQueue
+        if let appSupportURL = try? FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        ), let diskQueue = try? DatabaseQueue(
+            path: appSupportURL.appendingPathComponent("workholl.sqlite").path,
+            configuration: config
+        ) {
+            resolvedQueue = diskQueue
+        } else {
+            resolvedQueue = try! DatabaseQueue(configuration: config)
         }
+
+        self.dbQueue = resolvedQueue
+        try? migrator.migrate(dbQueue)
+        try? seedInitialDataIfNeeded()
     }
 
     private var migrator: DatabaseMigrator {
