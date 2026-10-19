@@ -1,0 +1,67 @@
+name: iOS Build WorkHoll
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Unsigned WorkHoll (.app & .ipa)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: |
+          if ! command -v xcodegen &> /dev/null; then
+            brew install xcodegen
+          fi
+          xcodegen --version
+
+      - name: Generate Xcode Project
+        run: xcodegen generate
+
+      - name: Resolve Swift Packages
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project WorkHoll.xcodeproj \
+            -scheme WorkHoll
+
+      - name: Build WorkHoll (Unsigned iOS 16.0+)
+        run: |
+          xcodebuild \
+            -project WorkHoll.xcodeproj \
+            -scheme WorkHoll \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CONFIGURATION_BUILD_DIR="$(pwd)/build" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package .app into ZIP and .ipa
+        run: |
+          cd build
+          zip -r ../WorkHoll-app.zip WorkHoll.app
+          cd ..
+          mkdir -p Payload
+          cp -R build/WorkHoll.app Payload/
+          zip -r WorkHoll.ipa Payload
+
+      - name: Upload WorkHoll.app.zip Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorkHoll-app-zip
+          path: WorkHoll-app.zip
+
+      - name: Upload WorkHoll.ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorkHoll-ipa
+          path: WorkHoll.ipa

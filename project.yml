@@ -1,0 +1,54 @@
+name: WorkHoll
+options:
+  bundleIdPrefix: com.workholl
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "15.0"
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift.git
+    from: "6.24.0"
+targets:
+  WorkHoll:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: WorkHollApp.swift
+        excludes: ['.github']
+      - path: Models
+        excludes: ['.github']
+      - path: Database
+        excludes: ['.github']
+      - path: Services
+        excludes: ['.github']
+      - path: ViewModels
+        excludes: ['.github']
+      - path: Views
+        excludes: ['.github']
+      - path: Components
+        excludes: ['.github']
+      - path: Utilities
+        excludes: ['.github']
+      - path: Assets.xcassets
+      - path: LaunchScreen.storyboard
+    info:
+      path: Info.plist
+    dependencies:
+      - package: GRDB
+        product: GRDB
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.workholl.waiter
+        PRODUCT_NAME: WorkHoll
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        DEVELOPMENT_TEAM: ""
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
